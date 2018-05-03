@@ -7,16 +7,10 @@
 #include <omp.h>
 
 
-#define MERGESORT
-//#define KMERGESORT
-//#define SELECTIONSORT
-//#define QUICKSORT
-
-
-//#define PLOT
+#define PLOT
 #define CUTOFF 32
 #define M 512 //My laptop L1 is 32kb so (32/2)*1024/32 = 512
-#define DEBUG
+//#define DEBUG
 
 #define THREADS 4 //should only be 1,2, or 4
 
