@@ -1,0 +1,12 @@
+L2 (512kb) is disabled.
+L1 (16kb) is per-core.
+
+Page size is 4096 bytes.
+There are 220693 physical pages, meaning ~862MB.
+
+ARM Cortex-A53 MP Core.
+
+L1 D-cache has line length of 64 bytes. 4-way set associative.
+
+
+Mallocable memory is somewhere between 850MB and 950MB.
