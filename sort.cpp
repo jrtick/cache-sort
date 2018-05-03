@@ -8,11 +8,15 @@
 
 
 #define PLOT
-#define CUTOFF 32
-#define M 512 //My laptop L1 is 32kb so (32/2)*1024/32 = 512
-//#define DEBUG
+#define CUTOFF 128
+#define M 2048 //rpi has 16kb L1 so (16/2)*1024/4 = 2048
+//#define DEBUG //this just checks correctness
 
+//THREAD COUNT ONLY APPLIES IF PARALLEL ALGO IS RUN
 #define THREADS 4 //should only be 1,2, or 4
+
+//K is O(M/B) = 16*1024/64 = 256. I'll use 256/8 = 32
+#define K 32 //MUST be greater than 4 for parallel code to work right
 
 void naivesort(int* arr,int count);
 void quicksort(int* arr,int count);
@@ -92,8 +96,6 @@ void mergesort_parallel(int* arr, int count,int* scratch){
   memcpy(arr,scratch,sizeof(int)*count);
 }
 
-//M should be cachesize / sizeof(int). 128 on rpi?
-#define K 8 //MUST be greater than 4 for parallel code to work right
 void kmergesort(int* arr,int count,int* scratch){
   if(count<M) quicksort(arr,count); //free since fit in cache
   else{
@@ -511,5 +513,8 @@ int main(int argc, char** argv){
 
   free(nums);
   free(scratch);
+#ifdef DEBUG
+  free(answers);
+#endif
   return 0;
 }
