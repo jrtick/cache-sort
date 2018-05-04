@@ -1,12 +1,6 @@
 import os
 from time import sleep
 
-#my computer has 32KB L1, 256KB L2, 4MB L3 shared
-#32KB = 8192 ints
-#32KB+256KB = 73,728 ints
-#32KB+256KB+4MB = 1,122,304 ints
-
-
 sorts = ["./samplesort","./mergesort","./quicksort","./kmergesort"]
 
 
@@ -14,15 +8,20 @@ outfile = "results.txt"
 tempfile = "temp.txt"
 os.system("echo 'results' > "+tempfile);
 
-runs = [j*10000 for j in range(1,100,5)]#2**j for j in range(4,20,2)] #4,30??
+runs = [2**j for j in range(11,21)] #2048 to 1mil
+
+runpar = True
+runser = True
 
 for i in runs:
   print "running %d" % i
   for sort in sorts:
-    os.system(sort+" "+str(i)+" 1 >> "+tempfile)
-    sleep(.1)
-    os.system(sort+" "+str(i)+" 0 >> "+tempfile)
-    sleep(.1)
+    if runser:
+      os.system(sort+" "+str(i)+" 1 >> "+tempfile)
+      sleep(.3)
+    if runpar:
+      os.system(sort+" "+str(i)+" 0 >> "+tempfile)
+      sleep(.3)
 
 print "processing file!"
 
@@ -31,8 +30,8 @@ out = open(outfile,"w+")
 
 out.write("time(ms) ");
 for sort in sorts:
-  out.write("%s " % sort[2:])
-  out.write("%s(parallel) " % sort[2:])
+  if runser: out.write("%s " % sort[2:])
+  if runpar: out.write("%s(parallel) " % sort[2:])
 out.write("\n")
 
 temp.readline()
@@ -46,7 +45,7 @@ while l:
   time = float(time)
   if(idx != curidx):
     if(curidx != -1):
-      out.write("%d " % idx)
+      out.write("%d " % curidx)
       for i in xrange(len(counts)):
         out.write("%f " % counts[i])
       out.write("\n")
@@ -55,7 +54,7 @@ while l:
   counts += [time]
   l = temp.readline().strip()
 
-out.write("%d " % idx)
+out.write("%d " % curidx)
 for i in xrange(len(counts)):
   out.write("%f " % counts[i])
 out.write("\n")

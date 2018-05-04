@@ -8,15 +8,15 @@
 
 
 #define PLOT
-#define CUTOFF 128
-#define M 2048 //rpi has 16kb L1 so (16/2)*1024/4 = 2048
+#define CUTOFF 128 //empirically determined
+#define M 1024 //rpi has 16kb L1 so (16/3)*1024/4 = 1365
 //#define DEBUG //this just checks correctness
 
 //THREAD COUNT ONLY APPLIES IF PARALLEL ALGO IS RUN
 #define THREADS 4 //should only be 1,2, or 4
 
 //K is O(M/B) = 16*1024/64 = 256. I'll use 256/8 = 32
-#define K 32 //MUST be greater than 4 for parallel code to work right
+#define K 32 
 
 void naivesort(int* arr,int count);
 void quicksort(int* arr,int count);
@@ -134,8 +134,8 @@ void kmergesort(int* arr,int count,int* scratch){
 }
 void kmergesort_parallel(int* arr,int count,int* scratch){ //split merges onto independent threads
   const int merge_size = (count+THREADS-1)/THREADS;
-  int offsets[K];
-  int stops[K];
+  int offsets[THREADS];
+  int stops[THREADS];
   #pragma omp parallel
   {
     int tid = omp_get_thread_num();
