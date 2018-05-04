@@ -7,11 +7,11 @@
 #include <math.h>
 
 #define NAIVE 1
-#define MEM_EFFICIENT 2
-#define PARALLEL 3
+#define PARALLEL 2
+//#define WORKLOAD PARALLEL //will be defined by the compiler
 
-#define PRINT_OUT
-#define WORKLOAD PARALLEL
+#define THREADS 4
+//#define PRINT_OUT
 
 #define PTRSUB(X,Y) ((unsigned long)(((char*)(X))-((char*)(Y))))
 
@@ -24,9 +24,18 @@ struct Link{
   int rankS[2];
 };
 
-int main(){
-  const int heap_size = 20;//100000; //double alloc so rand has less collisions
-  Link* heap = (Link*) malloc(sizeof(Link)*heap_size);
+int main(int argc, char** argv){
+  if(argc != 2){
+    printf("Usage: ./lists num_nodes\n");
+    return 1;
+  }
+
+  omp_set_dynamic(0);
+  omp_set_num_threads(THREADS);
+
+
+  const int heap_size = 2*atoi(argv[1]); //double alloc so rand has less collisions
+  Link* heap = (Link*) calloc(heap_size,sizeof(Link));
   if(heap == NULL){
     printf("Segfault. Reduce heap size.\n");
     return -1;
@@ -39,8 +48,8 @@ int main(){
   int count = 0;
   Link* start = NULL;
   Link* end = NULL;
-  while(count < heap_size/2){ //TODO: do it like heap adjacent insert
-    const int randidx = rand() % heap_size; //TODO: avoid overalloc by randomly grabbing mask? lin search when end?
+  while(count < heap_size/2){ //TODO: better collision handling
+    const int randidx = rand() % heap_size;
 #ifdef PRINT_OUT
     printf("%d,",randidx);
 #endif
@@ -78,23 +87,16 @@ int main(){
     if(cur==end) break;
     cur = cur->next;
   }
-#elif(WORKLOAD == MEM_EFFICIENT)
-
 #elif(WORKLOAD == PARALLEL)
+  int sense = 0;
   #pragma omp for
   for(int i=0;i<heap_size;i++){
     Link* node = &heap[i];
-    if(node->next==node) node->rankS[0] = 1;
-    else node->rankS[0] = 0;
+    if(node->next==node) node->rankS[sense] = 1;
+    else node->rankS[sense] = 0;
   }
 
-  const int max_iters = log2(heap_size);
-  int sense = 0;
-  /*#pragma omp parallel num_threads(numthreads)
-  {
-    int tid = omp_get_thread_num();
-  #pragma omp barrier
-  }*/
+  const int max_iters = log2(heap_size)+1;
   for(int iter=0;iter<max_iters;iter++){
     #pragma omp for
     for(int i=0;i<heap_size;i++){
